@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>包包DIY V3</title>
+<style>
+:root {
+  --bg-primary: #FAF3E8;
+  --bg-secondary: #F5ECD7;
+  --bg-card: #FFFBF2;
+  --accent-brown: #8B6914;
+  --accent-brown-light: #C4A35A;
+  --accent-gold: #D4A84B;
+  --accent-gold-light: #F0D78C;
+  --text-primary: #3D2B1F;
+  --text-secondary: #6B5B4E;
+  --text-light: #9C8B7A;
+  --border-color: #E8D5B8;
+  --shadow-soft: 0 2px 12px rgba(139,105,20,0.08);
+  --shadow-card: 0 2px 8px rgba(139,105,20,0.08);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --success: #6B8E23;
+  --danger: #C0392B;
+  --info: #5B7DB1;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+body { touch-action: manipulation; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg-primary);
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+.phone-frame {
+  width: 375px; height: 812px; background: var(--bg-primary);
+  border-radius: 40px; border: 8px solid #2C2C2C;
+  overflow: hidden; position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2), inset 0 0 0 2px #444;
+}
+.phone-notch {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 150px; height: 28px; background: #2C2C2C;
+  border-radius: 0 0 18px 18px; z-index: 1000;
+}
+.phone-status-bar {
+  height: 44px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; font-size: 12px; color: var(--text-secondary);
+  position: relative; z-index: 999;
+}
+.app-container {
+  height: calc(812px - 44px); display: flex; flex-direction: column; overflow: hidden;
+}
+.page-content {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; padding-bottom: 70px;
+  will-change: transform; touch-action: pan-y;
+}
+.page-content::-webkit-scrollbar { width: 0; }
+.bottom-nav {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 70px; background: var(--bg-card);
+  border-top: 1px solid var(--border-color);
+  display: flex; z-index: 100; padding-bottom: 10px;
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 3px; cursor: pointer; transition: all 0.3s;
+  color: var(--text-light);
+}
+.nav-item.active { color: var(--accent-brown); }
+.nav-item svg { width: 24px; height: 24px; }
+.nav-item span { font-size: 10px; }
+.page { display: none; }
+.page.page.active { display: flex; flex-direction: column; flex: 1; animation: fadeIn 0.3s ease; overflow: hidden; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+.toast-container {
+  position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
+  z-index: 2000; pointer-events: none;
+}
+.toast {
+  background: rgba(61,43,31,0.9); color: #fff;
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; white-space: nowrap; animation: fadeIn 0.3s ease; margin-bottom: 8px;
+}
+.section-title {
+  font-size: 16px; font-weight: 600; color: var(--text-primary);
+  padding: 16px 16px 8px; display: flex; align-items: center; gap: 6px;
+}
+.section-title::before {
+  content: ""; width: 3px; height: 16px; background: var(--accent-gold); border-radius: 2px;
+}
+.card {
+  background: var(--bg-card); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft); margin: 0 16px 12px; overflow: hidden; transition: transform 0.2s;
+}
+.card:active { transform: scale(0.98); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 10px 20px; border-radius: var(--radius-xl);
+  font-size: 14px; font-weight: 500; cursor: pointer;
+  transition: all 0.3s; border: none;
+}
+.btn-primary { background: linear-gradient(135deg, var(--accent-brown), var(--accent-gold)); color: #fff; }
+.btn-primary:active { transform: scale(0.96); }
+.btn-outline { background: transparent; border: 1.5px solid var(--accent-brown-light); color: var(--accent-brown); }
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+.tag {
+  display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 12px;
+  font-size: 11px; background: var(--bg-secondary); color: var(--text-secondary);
+  cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent;
+}
+.tag.selected { background: var(--accent-gold-light); color: var(--accent-brown); border-color: var(--accent-gold); }
+.step-bar {
+  display: flex; align-items: center; justify-content: center;
+  padding: 12px 16px; background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+}
+.step-item { display: flex; align-items: center; gap: 0; cursor: pointer; }
+.step-circle {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; background: var(--bg-secondary);
+  color: var(--text-light); transition: all 0.3s; border: 2px solid transparent;
+}
+.step-item.active .step-circle {
+  background: var(--accent-brown); color: #fff;
+  border-color: var(--accent-gold); box-shadow: 0 2px 8px rgba(139,105,20,0.3);
+}
+.step-item.done .step-circle {
+  background: var(--accent-gold-light); color: var(--accent-brown); border-color: var(--accent-gold);
+}
+.step-line { width: 24px; height: 2px; background: var(--border-color); transition: background 0.3s; }
+.step-line.done { background: var(--accent-gold); }
+.step-label { font-size: 9px; color: var(--text-light); text-align: center; margin-top: 2px; }
+.step-item.active .step-label { color: var(--accent-brown); font-weight: 600; }
+.substep-bar {
+  display: flex; gap: 6px; padding: 8px 16px;
+  overflow-x: auto; background: var(--bg-secondary);
+}
+.substep-dot {
+  min-width: 28px; height: 28px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; background: var(--bg-card); color: var(--text-light);
+  border: 1.5px solid var(--border-color); cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.substep-dot.active { background: var(--accent-brown); color: #fff; border-color: var(--accent-gold); }
+.substep-dot.done { background: var(--accent-gold-light); color: var(--accent-brown); border-color: var(--accent-gold); }
+.mode-switch {
+  display: flex; background: var(--bg-secondary); border-radius: var(--radius-xl); padding: 3px; margin: 8px 16px;
+}
+.mode-switch-item {
+  flex: 1; text-align: center; padding: 6px 0; border-radius: var(--radius-xl);
+  font-size: 12px; cursor: pointer; transition: all 0.3s; color: var(--text-secondary);
+}
+.mode-switch-item.active { background: var(--accent-brown); color: #fff; box-shadow: var(--shadow-soft); }
+.color-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; padding: 8px 0; }
+.color-swatch {
+  width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: all 0.2s;
+  border: 2px solid transparent; margin: 0 auto;
+}
+.color-swatch.selected { border-color: var(--accent-brown); box-shadow: 0 0 0 3px var(--accent-gold-light); transform: scale(1.1); }
+.shape-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 16px; }
+.shape-card {
+  background: var(--bg-card); border-radius: var(--radius-sm);
+  padding: 10px 6px; text-align: center; border: 2px solid transparent;
+  cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-soft);
+}
+.shape-card.selected { border-color: var(--accent-gold); background: var(--accent-gold-light); }
+.shape-card svg { width: 50px; height: 50px; margin: 0 auto 4px; }
+.shape-card .name { font-size: 11px; color: var(--text-secondary); }
+.shape-card.selected .name { color: var(--accent-brown); font-weight: 600; }
+.size-options { display: flex; gap: 8px; padding: 8px 0; }
+.size-option {
+  flex: 1; text-align: center; padding: 10px 4px; background: var(--bg-card);
+  border-radius: var(--radius-sm); border: 1.5px solid var(--border-color);
+  cursor: pointer; transition: all 0.2s;
+}
+.size-option.selected { border-color: var(--accent-gold); background: var(--accent-gold-light); }
+.size-option .size-label { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.size-option .size-dim { font-size: 10px; color: var(--text-light); margin-top: 2px; }
+.size-option .recommend-tag {
+  display: inline-block; font-size: 9px; background: var(--accent-gold);
+  color: #fff; padding: 1px 6px; border-radius: 8px; margin-top: 4px;
+}
+.template-scroll {
+  display: flex; gap: 12px; padding: 8px 16px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch; will-change: transform;
+}
+.template-scroll::-webkit-scrollbar { display: none; }
+.template-card {
+  min-width: 150px; background: var(--bg-card); border-radius: var(--radius-md);
+  overflow: hidden; box-shadow: var(--shadow-soft); cursor: pointer;
+  transition: transform 0.2s; flex-shrink: 0; touch-action: manipulation;
+}
+.template-card:active { transform: scale(0.96); }
+.template-card .tpl-img { height: 120px; display: flex; align-items: center; justify-content: center; background: var(--bg-secondary); }
+.template-card .tpl-info { padding: 8px 10px; }
+.template-card .tpl-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.template-card .tpl-desc { font-size: 10px; color: var(--text-light); margin-top: 2px; }
+.maker-card { display: flex; align-items: center; gap: 10px; padding: 10px 16px; }
+.maker-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--bg-secondary); flex-shrink: 0; overflow: hidden; }
+.maker-info { flex: 1; }
+.maker-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.maker-style { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+.maker-rating { font-size: 11px; color: var(--accent-gold); margin-top: 2px; }
+.work-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 16px; }
+.work-item { background: var(--bg-card); border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-soft); cursor: pointer; transition: transform 0.2s; }
+.work-item:active { transform: scale(0.97); }
+.work-item .work-img { height: 100px; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; }
+.work-item .work-title { padding: 6px 8px; font-size: 11px; color: var(--text-primary); font-weight: 500; }
+.preview-panel {
+  background: var(--bg-card); border-radius: var(--radius-md); margin: 8px 16px;
+  padding: 12px; box-shadow: var(--shadow-soft); min-height: 120px;
+  display: flex; align-items: center; justify-content: center;
+}
+.draw-toolbar {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 8px 12px;
+  background: var(--bg-card); border-bottom: 1px solid var(--border-color);
+}
+.draw-tool {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 6px 2px; border-radius: 8px; background: var(--bg-secondary);
+  cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent; gap: 2px;
+  touch-action: manipulation;
+}
+.draw-tool .dt-icon { font-size: 18px; line-height: 1; }
+.draw-tool .dt-label { font-size: 9px; color: var(--text-secondary); white-space: nowrap; }
+.draw-tool.active { background: var(--accent-brown); border-color: var(--accent-gold); }
+.draw-tool.active .dt-label { color: #fff; }
+.draw-tool.active .dt-icon { filter: brightness(2); }
+.draw-tool.symmetry-on { background: var(--accent-gold-light); border-color: var(--accent-gold); }
+.draw-tool.symmetry-on .dt-label { color: var(--accent-brown); font-weight: 600; }
+.draw-canvas-wrap { position: relative; margin: 8px; background: #fff; border-radius: var(--radius-sm); border: 1px solid var(--border-color); overflow: hidden; touch-action: none; }
+.step-nav { display: flex; gap: 10px; padding: 12px 16px; background: var(--bg-card); border-top: 1px solid var(--border-color); }
+.step-nav .btn { flex: 1; }
+.guide-banner {
+  margin: 8px 16px; padding: 14px; background: linear-gradient(135deg, var(--accent-gold-light), var(--bg-secondary));
+  border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px; cursor: pointer;
+}
+.guide-banner .gb-icon {
+  width: 40px; height: 40px; border-radius: 50%; background: var(--accent-brown);
+  color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+}
+.guide-banner .gb-text { flex: 1; }
+.guide-banner .gb-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.guide-banner .gb-desc { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.note-card {
+  background: #FFF9E6; border-left: 3px solid var(--accent-gold);
+  padding: 10px 12px; margin: 6px 16px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 12px; color: var(--text-secondary); line-height: 1.6;
+}
+.custom-input-row { display: flex; gap: 8px; padding: 8px 0; }
+.custom-input {
+  flex: 1; display: flex; align-items: center; background: var(--bg-card);
+  border: 1.5px solid var(--border-color); border-radius: var(--radius-sm); padding: 0 8px;
+}
+.custom-input input { border: none; outline: none; background: transparent; width: 100%; padding: 8px 0; font-size: 13px; color: var(--text-primary); text-align: center; }
+.custom-input .unit { font-size: 11px; color: var(--text-light); margin-left: 4px; }
+.material-estimate {
+  background: var(--accent-gold-light); border-radius: var(--radius-sm);
+  padding: 8px 12px; margin: 8px 0; font-size: 12px; color: var(--accent-brown);
+  display: flex; align-items: center; gap: 6px;
+}
+.hw-option {
+  display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px;
+  border-radius: var(--radius-sm); background: var(--bg-card); border: 1.5px solid var(--border-color);
+  cursor: pointer; transition: all 0.2s; margin: 4px; font-size: 12px;
+}
+.hw-option.selected { border-color: var(--accent-gold); background: var(--accent-gold-light); }
+.hw-color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.decor-option {
+  display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 16px;
+  background: var(--bg-card); border: 1.5px solid var(--border-color);
+  cursor: pointer; transition: all 0.2s; margin: 4px; font-size: 12px;
+}
+.decor-option.selected { border-color: var(--accent-gold); background: var(--accent-gold-light); }
+.lining-card {
+  padding: 10px 12px; background: var(--bg-card); border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-color); cursor: pointer; transition: all 0.2s; margin-bottom: 6px;
+}
+.lining-card.selected { border-color: var(--accent-gold); background: var(--accent-gold-light); }
+.lining-card .lc-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.lining-card .lc-desc { font-size: 10px; color: var(--text-light); margin-top: 2px; }
+.material-row {
+  display: flex; align-items: center; padding: 8px 16px;
+  border-bottom: 1px solid var(--border-color); font-size: 12px;
+}
+.material-row .mat-name { flex: 2; color: var(--text-primary); }
+.material-row .mat-qty { flex: 1; color: var(--text-secondary); text-align: center; }
+.material-row .mat-price { flex: 1; color: var(--text-secondary); text-align: center; }
+.material-row .mat-sub { flex: 1; color: var(--accent-brown); text-align: right; font-weight: 600; }
+.material-total {
+  display: flex; justify-content: space-between; padding: 12px 16px; font-weight: 600;
+  border-top: 2px solid var(--accent-gold); background: var(--accent-gold-light);
+}
+.maker-profile {
+  display: flex; gap: 10px; padding: 10px; background: var(--bg-card);
+  border-radius: var(--radius-sm); margin-bottom: 8px; align-items: center; box-shadow: var(--shadow-soft);
+}
+.maker-profile .mp-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--bg-secondary); flex-shrink: 0; overflow: hidden; }
+.maker-profile .mp-info { flex: 1; }
+.maker-profile .mp-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.maker-profile .mp-style { font-size: 11px; color: var(--text-light); }
+.maker-profile .mp-rating { color: var(--accent-gold); font-size: 12px; }
+.tutorial-step { display: flex; gap: 12px; padding: 12px 16px; align-items: flex-start; }
+.tutorial-step .step-img { width: 80px; height: 80px; flex-shrink: 0; background: var(--bg-secondary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; }
+.tutorial-step .step-text { flex: 1; }
+.tutorial-step .step-num { font-size: 12px; color: var(--accent-gold); font-weight: 600; }
+.tutorial-step .step-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 2px 0; }
+.tutorial-step .step-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+.warning-item { display: flex; gap: 8px; padding: 10px 16px; align-items: flex-start; }
+.warning-item .wi-num { width: 20px; height: 20px; border-radius: 50%; background: var(--accent-brown); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+.warning-item .wi-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.warning-item .wi-title { font-weight: 600; color: var(--text-primary); }
+.my-design-item { display: flex; gap: 10px; padding: 12px 16px; align-items: center; border-bottom: 1px solid var(--border-color); }
+.my-design-thumb { width: 56px; height: 56px; border-radius: var(--radius-sm); background: var(--bg-secondary); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.my-design-info { flex: 1; }
+.my-design-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.my-design-meta { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+.setting-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border-color); }
+.setting-item .si-label { font-size: 14px; color: var(--text-primary); }
+.toggle { width: 44px; height: 24px; border-radius: 12px; background: var(--border-color); cursor: pointer; position: relative; transition: background 0.3s; }
+.toggle.on { background: var(--accent-brown); }
+.toggle::after { content: ""; position: absolute; width: 20px; height: 20px; border-radius: 50%; background: #fff; top: 2px; left: 2px; transition: transform 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.toggle.on::after { transform: translateX(20px); }
+.output-tabs { display: flex; background: var(--bg-secondary); border-radius: var(--radius-xl); padding: 3px; margin: 8px 16px; flex-wrap: wrap; }
+.output-tab { flex: 1; min-width: 50px; text-align: center; padding: 6px 2px; border-radius: var(--radius-xl); font-size: 10px; cursor: pointer; transition: all 0.3s; color: var(--text-secondary); }
+.output-tab.active { background: var(--accent-brown); color: #fff; }
+.fast-mode-switch { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary); padding: 4px 8px; background: var(--bg-secondary); border-radius: 12px; cursor: pointer; }
+.fast-mode-switch .fms-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-brown); }
+.overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-primary); z-index: 500; display: none; flex-direction: column; }
+.overlay.show { display: flex; }
+.overlay-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border-color); }
+.overlay-header .oh-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+.style-note { margin: 8px 16px; padding: 8px 12px; background: var(--bg-secondary); border-radius: var(--radius-sm); font-size: 11px; color: var(--text-secondary); }
+.section-subtitle { font-size: 12px; color: var(--text-light); padding: 4px 16px 8px; }
+.bag-preview-area {
+  background: #fff; border-radius: var(--radius-md); margin: 8px 16px; padding: 12px;
+  min-height: 100px; display: flex; align-items: center; justify-content: center;
+  border: 1px dashed var(--border-color);
+}
+.bag-preview-area svg { max-width: 100%; max-height: 140px; }
+.free-shape-preview {
+  background: #fff; border-radius: var(--radius-md); margin: 8px 16px; padding: 12px;
+  min-height: 100px; display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--accent-gold); position: relative;
+}
+.free-shape-preview img { max-width: 100%; max-height: 160px; border-radius: 4px; }
+.free-shape-badge {
+  position: absolute; top: 8px; right: 8px; background: var(--accent-gold-light);
+  color: var(--accent-brown); padding: 2px 8px; border-radius: 10px;
+  font-size: 10px; font-weight: 600;
+}
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+  <div class="phone-status-bar"><span>9:41</span><span>●●● WiFi</span></div>
+  <div class="app-container">
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- 首页 -->
+    <div class="page active" id="pageHome">
+      <div class="page-content">
+        <div style="padding:12px 16px 4px;display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:22px;font-weight:700;color:var(--text-primary)">🧵 包包DIY</div>
+          <div style="font-size:12px;color:var(--text-light)">设计你的专属包包</div></div>
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer">🔔</div>
+        </div>
+        <div class="guide-banner" onclick="showToast('即将进入新手教程')">
+          <div class="gb-icon">📖</div>
+          <div class="gb-text"><div class="gb-title">新手入门指南</div><div class="gb-desc">3分钟学会设计你的第一个包包</div></div>
+          <span style="color:var(--accent-brown)">→</span>
+        </div>
+        <div class="section-title">热门设计模板</div>
+        <div class="template-scroll" id="templateScroll"></div>
+        <div class="section-title">制作者推荐</div>
+        <div id="homeMakers"></div>
+        <div style="height:20px"></div>
+      </div>
+    </div>
+
+    <!-- 设计页 -->
+    <div class="page" id="pageDesign">
+      <div class="page-content" style="padding-bottom:80px">
+        <div class="step-bar" id="stepBar"></div>
+        <div style="display:flex;justify-content:flex-end;padding:0 16px 4px">
+          <div class="fast-mode-switch" onclick="toggleDesignMode()">
+            <div class="fms-dot"></div><span id="designModeLabel">制作者模式</span>
+          </div>
+        </div>
+        <div class="substep-bar" id="substepBar" style="display:none"></div>
+        <div id="stepContainer"></div>
+        <div class="step-nav" id="stepNav"></div>
+      </div>
+    </div>
+
+    <!-- 社群页 -->
+    <div class="page" id="pageCommunity">
+      <div class="page-content">
+        <div style="padding:12px 16px 4px">
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary)">手工社群</div>
+          <div style="font-size:12px;color:var(--text-light)">发现优秀的制作者与作品</div>
+        </div>
+        <div class="section-title">制作者</div>
+        <div id="communityMakers"></div>
+        <div class="section-title">作品墙</div>
+        <div class="work-grid" id="workGrid"></div>
+        <div style="height:20px"></div>
+      </div>
+    </div>
+
+    <!-- 我的 -->
+    <div class="page" id="pageMy">
+      <div class="page-content">
+        <div style="padding:16px;display:flex;align-items:center;gap:12px">
+          <div style="width:56px;height:56px;border-radius:50%;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-size:24px">👤</div>
+          <div><div style="font-size:18px;font-weight:700;color:var(--text-primary)">手工爱好者</div>
+          <div style="font-size:12px;color:var(--text-light)">已设计 3 个包包</div></div>
+        </div>
+        <div class="section-title">模式切换</div>
+        <div class="mode-switch" style="margin:0 16px 12px">
+          <div class="mode-switch-item active" id="modeMaker" onclick="switchMode('maker')">🛠 制作者</div>
+          <div class="mode-switch-item" id="modeBeginner" onclick="switchMode('beginner')">🌱 小白</div>
+        </div>
+        <div class="section-title">我的设计</div>
+        <div id="myDesigns"></div>
+        <div class="section-title">设置</div>
+        <div style="background:var(--bg-card);margin:0 16px;border-radius:var(--radius-md);overflow:hidden">
+          <div class="setting-item"><span class="si-label">消息通知</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="setting-item"><span class="si-label">深色模式</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+          <div class="setting-item"><span class="si-label">语言</span><span style="font-size:13px;color:var(--text-light)">简体中文 ›</span></div>
+          <div class="setting-item"><span class="si-label">关于</span><span style="font-size:13px;color:var(--text-light)">V3.0 ›</span></div>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+    <div class="nav-item active" data-page="Home" onclick="switchPage('Home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>首页</span>
+    </div>
+    <div class="nav-item" data-page="Design" onclick="switchPage('Design')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>设计</span>
+    </div>
+    <div class="nav-item" data-page="Community" onclick="switchPage('Community')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span>社群</span>
+    </div>
+    <div class="nav-item" data-page="My" onclick="switchPage('My')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>我的</span>
+    </div>
+  </div>
+
+  <!-- Free draw overlay -->
+  <div class="overlay" id="drawOverlay">
+    <div class="overlay-header">
+      <button class="btn btn-sm btn-outline" onclick="closeFreeDraw()">✕ 关闭</button>
+      <span class="oh-title">自由创作画板</span>
+      <button class="btn btn-sm btn-primary" id="confirmDrawBtn" onclick="confirmFreeDraw()">✓ 确认形状</button>
+    </div>
+    <div class="draw-toolbar" id="drawToolbar"></div>
+    <div class="draw-canvas-wrap"><canvas id="drawCanvas" width="359" height="400"></canvas></div>
+    <div style="padding:8px 16px;font-size:11px;color:var(--text-light);text-align:center">
+      在画布上绘制包包外轮廓，开启对称模式可左右镜像绘制
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== DATA ==========
+const SHAPES = [
+  {id:'rect',name:'长方形',sub:'托特包',dims:{s:[25,18,10],m:[35,25,15],l:[40,30,18]}},
+  {id:'square',name:'正方形',sub:'口金包',dims:{s:[15,15,8],m:[20,20,10],l:[25,25,12]}},
+  {id:'semicircle',name:'半圆形',sub:'半月包',dims:{s:[20,15,8],m:[28,20,10],l:[35,25,12]}},
+  {id:'cylinder',name:'圆柱形',sub:'法棍包',dims:{s:[20,10,10],m:[30,15,12],l:[40,18,15]}},
+  {id:'trapezoid',name:'梯形',sub:'水桶包',dims:{s:[20,15,18],m:[28,22,25],l:[35,28,30]}},
+  {id:'fan',name:'扇形',sub:'扇形包',dims:{s:[15,12,5],m:[20,16,8],l:[25,20,10]}},
+  {id:'oval',name:'椭圆形',sub:'马鞍包',dims:{s:[22,18,8],m:[30,24,12],l:[38,28,15]}},
+  {id:'hexagon',name:'六边形',sub:'几何包',dims:{s:[18,16,8],m:[24,22,12],l:[30,28,15]}},
+  {id:'heart',name:'心形',sub:'心形包',dims:{s:[15,15,6],m:[20,20,8],l:[25,25,10]}},
+  {id:'triangle',name:'三角形',sub:'三角包',dims:{s:[15,12,6],m:[22,18,10],l:[28,22,12]}},
+  {id:'ring',name:'圆环形',sub:'圆环包',dims:{s:[12,12,3],m:[18,18,5],l:[22,22,6]}},
+  {id:'tshape',name:'T形',sub:'邮差包',dims:{s:[22,18,8],m:[30,24,12],l:[38,28,15]}}
+];
+
+const STYLE_TAGS = ['传统','都市','运动','休闲','前卫','田园','学院派','街头','百搭','嬉皮士','朋克','洛丽塔','波西米亚','中性','淑女','民族'];
+
+const COLORS_24 = [
+  '#2C2C2C','#5C3317','#8B4513','#A0522D',
+  '#D2691E','#F5DEB3','#FFE4C4','#FFF8DC',
+  '#8B0000','#DC143C','#FF6347','#FF69B4',
+  '#4B0082','#6A5ACD','#4682B4','#87CEEB',
+  '#006400','#228B22','#9ACD32','#F0E68C',
+  '#FF8C00','#FFD700','#DAA520','#FFFFFF'
+];
+
+const MATERIALS_MAKER = {
+  leather: ['猪皮','牛皮','羊皮','马皮','蛇皮','铬鞣革(Togo)','铬鞣革(Saffiano)','铬鞣革(Caviar)','植鞣革','擦蜡植鞣革','铝鞣革','醛鞣革','油鞣革/疯马皮','头层皮','二层皮','PU革','PVC革'],
+  fabric: ['尼龙','牛津布','帆布(粗)','帆布(细)','牛仔布','棉布','涤纶布','涤棉布','全涤布','羽绒布']
+};
+
+const MATERIALS_BEGINNER = {
+  leather: [
+    {name:'硬质皮',desc:'结实耐磨，适合挺括包型',items:['牛皮','铬鞣革','植鞣革','头层皮']},
+    {name:'软质皮',desc:'柔软贴合，适合休闲款',items:['羊皮','猪皮','疯马皮','二层皮']},
+    {name:'人造皮',desc:'性价比高，入门首选',items:['PU革','PVC革']}
+  ],
+  fabric: ['尼龙','牛津布','帆布','牛仔布','棉布']
+};
+
+const CLOSURES = ['拉链','翻盖','抽绳','磁扣'];
+const STRAP_STYLES = ['单肩带','双提手','链条','编织带','宽肩带'];
+const HARDWARES = [
+  {name:'卡扣',icon:'🔗'},{name:'锁钮',icon:'🔒'},{name:'钉',icon:'📌'},
+  {name:'磁扣',icon:'🧲'},{name:'鸡眼',icon:'⭕'},{name:'链条',icon:'⛓'},
+  {name:'拉链头',icon:'🔘'},{name:'铰口',icon:'🔧'}
+];
+const DECORS = ['珠片','水钻','花边','羽毛','毛绒','亚克力饰品','干花干果','流苏','植物印花','扎染','拓染'];
+const LININGS_HARD = ['卡纸','皮糠纸','快巴纸','日本纸','杂胶'];
+const LININGS_SOFT = ['EVA回力胶','海绵','无纺布','钢片'];
+
+const MAKERS = [
+  {name:'林手工',style:'传统/民族',rating:4.9,avatar:'#D4A84B'},
+  {name:'小鹿皮具',style:'都市/百搭',rating:4.8,avatar:'#8B6914'},
+  {name:'布艺坊',style:'田园/休闲',rating:4.7,avatar:'#6B8E23'},
+  {name:'金属诗人',style:'前卫/朋克',rating:4.6,avatar:'#5B7DB1'},
+  {name:'温柔手作',style:'淑女/洛丽塔',rating:4.8,avatar:'#FF69B4'}
+];
+
+const TEMPLATES = [
+  {name:'经典托特包',desc:'都市百搭·铬鞣牛皮',shape:'rect',size:'m',styles:['都市','百搭'],bodyMat:'铬鞣革(Togo)',bodyColor:'#8B4513',closure:'磁扣',strap:'双提手',color:'#D2B48C'},
+  {name:'甜美半月包',desc:'淑女洛丽塔·羊皮粉色',shape:'semicircle',size:'s',styles:['淑女','洛丽塔'],bodyMat:'羊皮',bodyColor:'#FF69B4',closure:'翻盖',strap:'链条',color:'#FFB6C1'},
+  {name:'法式法棍包',desc:'复古百搭·植鞣牛皮',shape:'cylinder',size:'m',styles:['传统','百搭'],bodyMat:'植鞣革',bodyColor:'#D2691E',closure:'拉链',strap:'单肩带',color:'#DEB887'},
+  {name:'街头水桶包',desc:'街头休闲·疯马皮军绿',shape:'trapezoid',size:'m',styles:['街头','休闲'],bodyMat:'油鞣革/疯马皮',bodyColor:'#556B2F',closure:'抽绳',strap:'编织带',color:'#8FBC8F'},
+  {name:'可爱心形包',desc:'洛丽塔甜美·PU革红色',shape:'heart',size:'s',styles:['洛丽塔','休闲'],bodyMat:'PU革',bodyColor:'#DC143C',closure:'磁扣',strap:'链条',color:'#FF6347'},
+  {name:'几何六边形包',desc:'前卫都市·PVC透明',shape:'hexagon',size:'m',styles:['前卫','都市'],bodyMat:'PVC革',bodyColor:'#E0E0E0',closure:'拉链',strap:'宽肩带',color:'#B0C4DE'}
+];
+
+const WORKS = [
+  {title:'复古托特包',desc:'植鞣革手工缝制'},
+  {title:'樱花口金包',desc:'棉布+刺绣工艺'},
+  {title:'朋克链条包',desc:'黑色牛皮+金属链条'},
+  {title:'田园帆布袋',desc:'扎染帆布+流苏'},
+  {title:'迷你法棍包',desc:'马皮经典款'},
+  {title:'波西米亚圆包',desc:'编织+植物印花'}
+];
+
+const TUTORIAL_STEPS = [
+  {title:'裁剪面料',desc:'按照纸样裁剪面料，注意留出1cm缝位，裁剪时保持刀口锋利。'},
+  {title:'粘贴内衬',desc:'将内衬材料均匀粘贴到面料背面，确保无气泡和平整贴合。'},
+  {title:'缝合侧边',desc:'使用合适的针法和线材缝合侧边，保持针距均匀，缝线平直。'},
+  {title:'安装五金',desc:'按照标记位置安装五金配件，注意安装顺序和固定牢固度。'},
+  {title:'组装肩带',desc:'将肩带或提手安装到包体上，确保连接牢固、位置对称。'},
+  {title:'缝制内袋',desc:'将内袋缝制到里布上，注意口袋位置和开口方向。'},
+  {title:'整体组装',desc:'将包体各部分组合缝合，检查对位是否准确。'},
+  {title:'修整检查',desc:'修剪线头、检查缝线、确认五金稳固，完成最终品质检验。'}
+];
+
+const WARNINGS = [
+  {title:'缝线方向',text:'始终沿同一方向缝线，避免来回缝导致皮面起皱。'},
+  {title:'粘合剂选择',text:'皮料用水性黄胶，布料用布用热熔胶，不可混用。'},
+  {title:'植鞣革塑形',text:'植鞣革需湿水后塑形，干燥后定型，切勿强行弯折。'},
+  {title:'五金安装顺序',text:'先安装内侧五金再安装外侧，避免损坏已完成的表面。'},
+  {title:'内衬裁剪余量',text:'内衬裁剪时比面料多留0.5cm余量，确保包内平整。'},
+  {title:'成品保养',text:'皮革定期上油保养，避免暴晒和潮湿，存放时填充保形。'}
+];
+
+// ========== STATE ==========
+let currentStep = 1, currentSubStep = 1, appMode = 'maker', outputTab = 'effect', effectView = 'front';
+let designData = {
+  shape:null, size:null, customDims:{l:0,w:0,h:0}, isCustomSize:false, isFreeShape:false,
+  styles:[], bodyMaterial:null, bodyColor:null, closure:null,
+  strapStyle:null, strapMaterial:null, hardwares:[], hardwareColor:'gold',
+  decors:[], liningHard:null, liningSoft:null, freeDrawPath:null
+};
+
+// ========== NAVIGATION ==========
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page'+page);
+  if(target) target.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
+  if (page === 'Design') renderStep();
+}
+
+function showToast(msg) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  c.appendChild(t); setTimeout(() => t.remove(), 2500);
+}
+
+function switchMode(mode) {
+  appMode = mode;
+  document.getElementById('modeMaker').classList.toggle('active', mode === 'maker');
+  document.getElementById('modeBeginner').classList.toggle('active', mode === 'beginner');
+  document.getElementById('designModeLabel').textContent = mode === 'maker' ? '制作者模式' : '小白模式';
+  showToast(mode === 'maker' ? '已切换为制作者模式' : '已切换为小白模式');
+  if (currentStep === 4) renderStep();
+}
+
+function toggleDesignMode() { switchMode(appMode === 'maker' ? 'beginner' : 'maker'); }
+
+// ========== STEP NAV ==========
+function setStep(n) { if(n>=1&&n<=5){currentStep=n;currentSubStep=1;renderStep();} }
+function nextStep() { if(currentStep<5){currentStep++;currentSubStep=1;renderStep();} }
+function prevStep() { if(currentStep>1){currentStep--;currentSubStep=1;renderStep();} }
+function setSubStep(n) { currentSubStep=n; renderStep(); }
+
+function renderStepBar() {
+  const labels=['选大小','选形状','选风格','分结构','输出'];
+  let h='';
+  for(let i=1;i<=5;i++){
+    const cls=i===currentStep?'active':i<currentStep?'done':'';
+    h+='<div class="step-item '+cls+'" onclick="setStep('+i+')"><div><div class="step-circle">'+i+'</div><div class="step-label">'+labels[i-1]+'</div></div>';
+    if(i<5) h+='<div class="step-line '+(i<currentStep?'done':'')+'"></div>';
+    h+='</div>';
+  }
+  document.getElementById('stepBar').innerHTML=h;
+}
+
+function renderSubStepBar() {
+  const bar=document.getElementById('substepBar');
+  if(currentStep!==4){bar.style.display='none';return;}
+  bar.style.display='flex';
+  let h='';
+  for(let i=1;i<=6;i++){
+    const cls=i===currentSubStep?'active':i<currentSubStep?'done':'';
+    h+='<div class="substep-dot '+cls+'" onclick="setSubStep('+i+')">'+i+'</div>';
+  }
+  bar.innerHTML=h;
+}
+
+function renderStepNav() {
+  const nav=document.getElementById('stepNav'); let h='';
+  if(currentStep===4){
+    if(currentSubStep>1) h+='<button class="btn btn-outline" onclick="setSubStep('+(currentSubStep-1)+')">上一步</button>';
+    else h+='<button class="btn btn-outline" onclick="prevStep()">上一步</button>';
+    if(currentSubStep<6) h+='<button class="btn btn-primary" onclick="setSubStep('+(currentSubStep+1)+')">下一步</button>';
+    else h+='<button class="btn btn-primary" onclick="nextStep()">下一步</button>';
+  } else {
+    if(currentStep>1) h+='<button class="btn btn-outline" onclick="prevStep()">上一步</button>';
+    h+='<button class="btn btn-primary" onclick="showToast(\'预览当前设计\')">预览效果</button>';
+    if(currentStep<5) h+='<button class="btn btn-primary" onclick="nextStep()">下一步</button>';
+  }
+  nav.innerHTML=h;
+}
+
+// ========== SVG HELPERS ==========
+function darken(hex,amt){
+  if(!hex||hex[0]!=='#')return'#333333';
+  let r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  r=Math.max(0,r-amt);g=Math.max(0,g-amt);b=Math.max(0,b-amt);
+  return'#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+function shapeSVG(id,w,h){
+  w=w||50;h=h||50;
+  const f='var(--accent-brown)',s='var(--accent-brown)';
+  const svgs={
+    rect:'<rect x="8" y="10" width="34" height="30" rx="2" fill="'+f+'" opacity="0.3" stroke="'+s+'" stroke-width="1.5"/>',
+    square:'<rect x="10" y="10" width="30" height="30" rx="2" fill="'+f+'" opacity="0.3" stroke="'+s+'" stroke-width="1.5"/>',
+    semicircle:'<path d="M10,35 A15,15 0 0,1 40,35 Z" fill="'+f+'" opacity="0.3" stroke="'+s+'" stroke-width="1.5"/>',
+    cylinder:'<ellipse cx="25" cy="15" rx="15" ry="6" fill="'+f+'" opacity="0.3" stroke="'+s+'" stroke-width="1.5"/><rect x="10" y="15" width="30" height="22" fill="'+f+'" opacity="0.15" stroke="'+s+'" stroke-width="1.5"/><ellipse cx="25" cy="37" rx="15" ry="6" fill="'+f+'" opacity="0.3" stroke="'+s+'" stroke-width="1.5"/>',
+    trapezoid:'<path d="M15,12 L35,12 L42,40 L8,40 Z" fill="'+f+'" opacity="0.3" stroke="'+s+'" stroke-width="1.5"/>',
+    fan:'<path d="M8,38 L25,8 A20,20 0 0,1 42,38 Z" fill="'+f+'" opacity="0.3" stroke="'+s+'" stroke-width="1.5"/>',
+    oval:'<ellipse cx="25" cy="25" rx="18" ry="14" fill="'+f+'" opacity="0.3" stroke="'+s+'" stroke-width="1.5"/>',
+    hexagon:'<polygon points="25,8 40,17 40,33 25,42 10,33 10,17" fill="'+f+'" opacity="0.3" stroke="'+s+'" stroke-width="1.5"/>',
+    heart:'<path d="M25,40 C15,30 5,22 5,15 C5,8 11,4 17,4 C21,4 24,7 25,10 C26,7 29,4 33,4 C39,4 45,8 45,15 C45,22 35,30 25,40Z" fill="'+f+'" opacity="0.3" stroke="'+s+'" stroke-width="1.5"/>',
+    triangle:'<polygon points="25,8 45,40 5,40" fill="'+f+'" opacity="0.3" stroke="'+s+'" stroke-width="1.5"/>',
+    ring:'<circle cx="25" cy="25" r="18" fill="none" stroke="'+s+'" stroke-width="6" opacity="0.4"/><circle cx="25" cy="25" r="10" fill="'+f+'" opacity="0.15"/>',
+    tshape:'<path d="M10,10 L40,10 L40,20 L30,20 L30,42 L20,42 L20,20 L10,20 Z" fill="'+f+'" opacity="0.3" stroke="'+s+'" stroke-width="1.5"/>'
+  };
+  return '<svg viewBox="0 0 50 50" width="'+w+'" height="'+h+'">'+(svgs[id]||svgs.rect)+'</svg>';
+}
+
+function bagPreviewSVG(shape,color,w,h){
+  w=w||140;h=h||140;
+  const c=color||'#8B4513',d=darken(c,30);
+  const svgs={
+    rect:'<rect x="20" y="30" width="100" height="80" rx="4" fill="'+c+'" stroke="'+d+'" stroke-width="2"/><line x1="40" y1="30" x2="40" y2="18" stroke="'+d+'" stroke-width="3" stroke-linecap="round"/><line x1="100" y1="30" x2="100" y2="18" stroke="'+d+'" stroke-width="3" stroke-linecap="round"/>',
+    square:'<rect x="25" y="35" width="90" height="75" rx="3" fill="'+c+'" stroke="'+d+'" stroke-width="2"/><path d="M45,35 Q45,20 55,20 L85,20 Q95,20 95,35" fill="none" stroke="'+d+'" stroke-width="2"/>',
+    semicircle:'<path d="M20,100 A50,50 0 0,1 120,100 Z" fill="'+c+'" stroke="'+d+'" stroke-width="2"/><line x1="50" y1="55" x2="50" y2="30" stroke="'+d+'" stroke-width="2" stroke-linecap="round"/><line x1="90" y1="55" x2="90" y2="30" stroke="'+d+'" stroke-width="2" stroke-linecap="round"/>',
+    cylinder:'<ellipse cx="70" cy="40" rx="45" ry="14" fill="'+c+'" stroke="'+d+'" stroke-width="2"/><rect x="25" y="40" width="90" height="55" fill="'+c+'" stroke="'+d+'" stroke-width="2"/><ellipse cx="70" cy="95" rx="45" ry="14" fill="'+d+'" opacity="0.3" stroke="'+d+'" stroke-width="2"/><line x1="70" y1="26" x2="70" y2="12" stroke="'+d+'" stroke-width="2" stroke-linecap="round"/>',
+    trapezoid:'<path d="M40,30 L100,30 L120,110 L20,110 Z" fill="'+c+'" stroke="'+d+'" stroke-width="2"/><line x1="55" y1="30" x2="45" y2="15" stroke="'+d+'" stroke-width="2" stroke-linecap="round"/><line x1="85" y1="30" x2="95" y2="15" stroke="'+d+'" stroke-width="2" stroke-linecap="round"/>',
+    fan:'<path d="M20,110 L70,20 A55,55 0 0,1 120,110 Z" fill="'+c+'" stroke="'+d+'" stroke-width="2"/>',
+    oval:'<ellipse cx="70" cy="75" rx="55" ry="40" fill="'+c+'" stroke="'+d+'" stroke-width="2"/><path d="M40,40 Q70,15 100,40" fill="none" stroke="'+d+'" stroke-width="2"/>',
+    hexagon:'<polygon points="70,15 120,40 120,90 70,115 20,90 20,40" fill="'+c+'" stroke="'+d+'" stroke-width="2"/><line x1="50" y1="25" x2="45" y2="10" stroke="'+d+'" stroke-width="2" stroke-linecap="round"/><line x1="90" y1="25" x2="95" y2="10" stroke="'+d+'" stroke-width="2" stroke-linecap="round"/>',
+    heart:'<path d="M70,120 C40,90 10,65 10,40 C10,18 28,5 45,5 C58,5 66,14 70,22 C74,14 82,5 95,5 C112,5 130,18 130,40 C130,65 100,90 70,120Z" fill="'+c+'" stroke="'+d+'" stroke-width="2"/><line x1="70" y1="22" x2="70" y2="8" stroke="'+d+'" stroke-width="2" stroke-linecap="round"/>',
+    triangle:'<polygon points="70,15 130,115 10,115" fill="'+c+'" stroke="'+d+'" stroke-width="2"/>',
+    ring:'<circle cx="70" cy="70" r="55" fill="none" stroke="'+c+'" stroke-width="18"/><circle cx="70" cy="70" r="30" fill="var(--bg-primary)"/>',
+    tshape:'<path d="M20,25 L120,25 L120,50 L85,50 L85,120 L55,120 L55,50 L20,50 Z" fill="'+c+'" stroke="'+d+'" stroke-width="2"/><line x1="55" y1="50" x2="40" y2="30" stroke="'+d+'" stroke-width="2" stroke-linecap="round"/><line x1="85" y1="50" x2="100" y2="30" stroke="'+d+'" stroke-width="2" stroke-linecap="round"/>'
+  };
+  return '<svg viewBox="0 0 140 140" width="'+w+'" height="'+h+'">'+(svgs[shape]||svgs.rect)+'</svg>';
+}
+
+function sideViewSVG(shape,color){
+  const c=color||'#8B4513',d=darken(c,30);
+  const svgs={
+    rect:'<rect x="30" y="5" width="80" height="65" rx="2" fill="'+c+'" opacity="0.5" stroke="'+d+'" stroke-width="1.5"/>',
+    cylinder:'<ellipse cx="70" cy="15" rx="40" ry="10" fill="'+c+'" opacity="0.5" stroke="'+d+'" stroke-width="1.5"/><rect x="30" y="15" width="80" height="40" fill="'+c+'" opacity="0.3" stroke="'+d+'" stroke-width="1.5"/><ellipse cx="70" cy="55" rx="40" ry="10" fill="'+c+'" opacity="0.4" stroke="'+d+'" stroke-width="1.5"/>',
+    trapezoid:'<path d="M40,10 L100,10 L110,70 L30,70 Z" fill="'+c+'" opacity="0.5" stroke="'+d+'" stroke-width="1.5"/>',
+    semicircle:'<rect x="30" y="10" width="80" height="55" rx="4" fill="'+c+'" opacity="0.5" stroke="'+d+'" stroke-width="1.5"/>'
+  };
+  return '<svg viewBox="0 0 140 80" width="140" height="80">'+(svgs[shape]||svgs.rect)+'</svg>';
+}
+
+function bottomViewSVG(shape,color){
+  const c=color||'#8B4513',d=darken(c,30);
+  const svgs={
+    rect:'<rect x="15" y="10" width="110" height="40" rx="2" fill="'+c+'" opacity="0.4" stroke="'+d+'" stroke-width="1.5"/>',
+    oval:'<ellipse cx="70" cy="30" rx="55" ry="22" fill="'+c+'" opacity="0.4" stroke="'+d+'" stroke-width="1.5"/>',
+    hexagon:'<polygon points="70,5 125,18 125,42 70,55 15,42 15,18" fill="'+c+'" opacity="0.4" stroke="'+d+'" stroke-width="1.5"/>'
+  };
+  return '<svg viewBox="0 0 140 60" width="140" height="60">'+(svgs[shape]||svgs.rect)+'</svg>';
+}
+
+// ========== MATERIAL CALC ==========
+function calcMaterialArea(shape,dims){
+  const l=dims[0],w=dims[1],h=dims[2];let area=0;
+  switch(shape){
+    case'rect':area=2*(l*w+l*h+w*h);break;
+    case'square':area=2*(l*l+l*h*2);break;
+    case'semicircle':area=Math.PI*l/2*w/2+l*h+w*h;break;
+    case'cylinder':area=Math.PI*l*w+2*Math.PI*w/2*w/2;break;
+    case'trapezoid':area=2*(l*w+(l+10)*h/2*2);break;
+    case'fan':area=Math.PI*l/2*w/2*0.5+l*h;break;
+    case'oval':area=Math.PI*l/2*w/2*2+(l+w)*h;break;
+    case'hexagon':area=2*(3*Math.sqrt(3)/2*l/2*l/2)+6*l/2*h;break;
+    case'heart':area=l*w*0.8+(l+w)*h;break;
+    case'triangle':area=l*w/2*2+(l+w)*h;break;
+    case'ring':area=Math.PI*l/2*l/2;break;
+    case'tshape':area=l*w+(w-10)*h+l*h;break;
+    default:area=2*(l*w+l*h+w*h);
+  }
+  return Math.round(area);
+}
+
+function getDims(){
+  if(designData.isCustomSize&&designData.customDims.l>0)
+    return[designData.customDims.l,designData.customDims.w,designData.customDims.h];
+  if(designData.shape&&designData.size){
+    const s=SHAPES.find(s=>s.id===designData.shape);
+    if(s)return s.dims[designData.size];
+  }
+  return[0,0,0];
+}
+
+function materialEstimate(){
+  const dims=getDims();if(dims[0]===0)return 0;
+  let area=calcMaterialArea(designData.shape,dims);
+  return Math.round(area*(1+(designData.isFreeShape?0.2:0.08)));
+}
+
+// ========== RENDER STEP 1: SIZE ==========
+function renderStep1(){
+  let h='<div style="padding:12px 0">';
+  h+='<div class="section-subtitle">先选形状后查看推荐尺寸，或直接选大小</div>';
+  h+='<div class="section-title">选择形状</div>';
+  h+='<div class="shape-grid">';
+  SHAPES.forEach(s=>{
+    const sel=designData.shape===s.id?'selected':'';
+    h+='<div class="shape-card '+sel+'" onclick="selectShape(\''+s.id+'\')">';
+    h+=shapeSVG(s.id,50,50);
+    h+='<div class="name">'+s.name+'</div></div>';
+  });
+  const sel2=designData.isFreeShape?'selected':'';
+  h+='<div class="shape-card '+sel2+'" onclick="openFreeDraw()" style="background:var(--accent-gold-light)">';
+  h+='<svg viewBox="0 0 50 50" width="50" height="50"><path d="M10,40 L20,15 L30,30 L40,10" fill="none" stroke="var(--accent-brown)" stroke-width="2" stroke-dasharray="3"/><circle cx="10" cy="40" r="3" fill="var(--accent-brown)"/><circle cx="20" cy="15" r="3" fill="var(--accent-brown)"/><circle cx="30" cy="30" r="3" fill="var(--accent-brown)"/><circle cx="40" cy="10" r="3" fill="var(--accent-brown)"/></svg>';
+  h+='<div class="name" style="color:var(--accent-brown)">自由创作</div></div>';
+  h+='</div>';
+
+  if(designData.isFreeShape&&designData.freeDrawPath){
+    h+='<div class="section-title" style="margin-top:8px">自由形状预览</div>';
+    h+='<div class="free-shape-preview">';
+    h+='<span class="free-shape-badge">✓ 自由创作</span>';
+    h+='<img src="'+designData.freeDrawPath+'" alt="自由形状">';
+    h+='</div>';
+    h+='<div style="text-align:center;padding:4px 16px"><button class="btn btn-sm btn-outline" onclick="openFreeDraw()">✏️ 重新绘制</button></div>';
+  }
+
+  if(designData.shape&&!designData.isFreeShape){
+    const shape=SHAPES.find(s=>s.id===designData.shape);
+    h+='<div class="section-title" style="margin-top:8px">推荐尺寸</div>';
+    h+='<div style="padding:0 16px"><div class="size-options">';
+    ['s','m','l'].forEach(sz=>{
+      const label=sz==='s'?'小号':sz==='m'?'中号':'大号';
+      const sel=designData.size===sz?'selected':'';
+      const d=shape.dims[sz];
+      const rec=sz==='m'?'<div class="recommend-tag">推荐</div>':'';
+      h+='<div class="size-option '+sel+'" onclick="selectSize(\''+sz+'\')">';
+      h+='<div class="size-label">'+label+'</div>';
+      h+='<div class="size-dim">'+d[0]+'×'+d[1]+'×'+d[2]+'cm</div>';
+      h+=rec+'</div>';
+    });
+    h+='</div></div>';
+  }
+
+  h+='<div class="section-title" style="margin-top:8px">自定义尺寸</div>';
+  h+='<div style="padding:0 16px"><div class="custom-input-row">';
+  h+='<div class="custom-input"><input type="number" placeholder="长" id="customL" onchange="updateCustomDims()" value="'+(designData.customDims.l||'')+'"><span class="unit">cm</span></div>';
+  h+='<div class="custom-input"><input type="number" placeholder="宽" id="customW" onchange="updateCustomDims()" value="'+(designData.customDims.w||'')+'"><span class="unit">cm</span></div>';
+  h+='<div class="custom-input"><input type="number" placeholder="高" id="customH" onchange="updateCustomDims()" value="'+(designData.customDims.h||'')+'"><span class="unit">cm</span></div>';
+  h+='</div>';
+
+  if(designData.shape){
+    const area=materialEstimate();
+    if(area>0) h+='<div class="material-estimate">📐 预估用料面积：<strong>'+area+' cm²</strong><span style="font-size:10px;margin-left:4px">（含'+(designData.isFreeShape?'20':'8')+'%余量）</span></div>';
+  }
+  h+='</div></div>';
+  document.getElementById('stepContainer').innerHTML=h;
+}
+
+function selectShape(id){designData.shape=id;designData.isFreeShape=false;designData.freeDrawPath=null;if(!designData.size)designData.size='m';renderStep1();}
+function selectSize(sz){designData.size=sz;designData.isCustomSize=false;renderStep1();}
+function updateCustomDims(){
+  const l=parseFloat(document.getElementById('customL').value)||0;
+  const w=parseFloat(document.getElementById('customW').value)||0;
+  const h=parseFloat(document.getElementById('customH').value)||0;
+  designData.customDims={l,w,h};
+  if(l>0&&w>0&&h>0)designData.isCustomSize=true;
+  renderStep1();
+}
+
+// ========== RENDER STEP 2: SHAPE ==========
+function renderStep2(){
+  let h='<div style="padding:12px 0">';
+  h+='<div class="section-title">选择包包形状</div>';
+  h+='<div class="section-subtitle">选择一种经典形状，或自由创作独特轮廓</div>';
+  h+='<div class="shape-grid">';
+  SHAPES.forEach(s=>{
+    const sel=designData.shape===s.id?'selected':'';
+    h+='<div class="shape-card '+sel+'" onclick="selectShape2(\''+s.id+'\')">';
+    h+=shapeSVG(s.id,50,50);
+    h+='<div class="name">'+s.name+'</div>';
+    h+='<div style="font-size:9px;color:var(--text-light)">'+s.sub+'</div></div>';
+  });
+  const sel2=designData.isFreeShape?'selected':'';
+  h+='<div class="shape-card '+sel2+'" onclick="openFreeDraw()" style="background:var(--accent-gold-light)">';
+  h+='<svg viewBox="0 0 50 50" width="50" height="50"><path d="M10,40 Q15,20 25,25 Q35,30 40,10" fill="none" stroke="var(--accent-brown)" stroke-width="2" stroke-dasharray="3"/></svg>';
+  h+='<div class="name" style="color:var(--accent-brown);font-weight:600">自由创作</div>';
+  h+='<div style="font-size:9px;color:var(--accent-brown)">画你想要的</div></div>';
+  h+='</div>';
+
+  if(designData.isFreeShape&&designData.freeDrawPath){
+    h+='<div class="section-title" style="margin-top:12px">自由形状预览</div>';
+    h+='<div class="free-shape-preview">';
+    h+='<span class="free-shape-badge">✓ 自由创作</span>';
+    h+='<img src="'+designData.freeDrawPath+'" alt="自由形状">';
+    h+='</div>';
+    h+='<div style="text-align:center;padding:4px 16px"><button class="btn btn-sm btn-outline" onclick="openFreeDraw()">✏️ 重新绘制</button></div>';
+  } else if(designData.shape&&!designData.isFreeShape){
+    h+='<div class="section-title" style="margin-top:12px">三视角预览</div>';
+    const color=designData.bodyColor||'#8B4513';
+    h+='<div style="padding:0 16px"><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">';
+    h+='<div style="text-align:center"><div style="font-size:10px;color:var(--text-light);margin-bottom:4px">正面</div><div class="preview-panel" style="margin:0">'+bagPreviewSVG(designData.shape,color)+'</div></div>';
+    h+='<div style="text-align:center"><div style="font-size:10px;color:var(--text-light);margin-bottom:4px">侧面</div><div class="preview-panel" style="margin:0">'+sideViewSVG(designData.shape,color)+'</div></div>';
+    h+='<div style="text-align:center"><div style="font-size:10px;color:var(--text-light);margin-bottom:4px">底部</div><div class="preview-panel" style="margin:0">'+bottomViewSVG(designData.shape,color)+'</div></div>';
+    h+='</div></div>';
+  }
+  h+='</div>';
+  document.getElementById('stepContainer').innerHTML=h;
+}
+
+function selectShape2(id){designData.shape=id;designData.isFreeShape=false;designData.freeDrawPath=null;if(!designData.size)designData.size='m';renderStep2();}
+
+// ========== RENDER STEP 3: STYLE ==========
+function renderStep3(){
+  let h='<div style="padding:12px 16px">';
+  h+='<div class="section-title" style="padding:0 0 8px">选择风格标签</div>';
+  h+='<div class="style-note">💡 风格仅影响Step4中的元素排序，不会自动替你选择</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">';
+  STYLE_TAGS.forEach(tag=>{
+    const sel=designData.styles.includes(tag)?'selected':'';
+    h+='<div class="tag '+sel+'" onclick="toggleStyle(\''+tag+'\')">'+tag+'</div>';
+  });
+  h+='</div>';
+  h+='<div style="margin-top:16px;padding:12px;background:var(--bg-card);border-radius:var(--radius-md)">';
+  h+='<div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:6px">已选风格</div>';
+  if(designData.styles.length>0){
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    designData.styles.forEach(s=>h+='<span style="background:var(--accent-gold-light);color:var(--accent-brown);padding:3px 8px;border-radius:10px;font-size:11px">'+s+'</span>');
+    h+='</div>';
+  } else h+='<div style="font-size:12px;color:var(--text-light)">尚未选择，可多选</div>';
+  h+='</div></div>';
+  document.getElementById('stepContainer').innerHTML=h;
+}
+
+function toggleStyle(tag){
+  const idx=designData.styles.indexOf(tag);
+  if(idx>=0)designData.styles.splice(idx,1);else designData.styles.push(tag);
+  renderStep3();
+}
+
+// ========== RENDER STEP 4: STRUCTURAL ==========
+function renderStep4(){
+  let h='';
+  switch(currentSubStep){
+    case 1:h=renderSub1();break;case 2:h=renderSub2();break;case 3:h=renderSub3();break;
+    case 4:h=renderSub4();break;case 5:h=renderSub5();break;case 6:h=renderSub6();break;
+  }
+  h+='<div class="section-title" style="margin-top:8px">实时预览</div>';
+  h+='<div class="bag-preview-area">';
+  const color=designData.bodyColor||'#8B4513';
+  if(designData.shape)h+=bagPreviewSVG(designData.shape,color,120,120);
+  else h+='<span style="font-size:12px;color:var(--text-light)">选择形状后显示预览</span>';
+  h+='</div>';
+  document.getElementById('stepContainer').innerHTML=h;
+}
+
+function renderSub1(){
+  let h='<div style="padding:12px 16px">';
+  if(appMode==='beginner'){
+    h+='<div class="note-card">选择包体材质和颜色，不同材质手感不同哦</div>';
+    h+='<div class="section-title" style="padding:8px 0 4px">皮质分类</div>';
+    MATERIALS_BEGINNER.leather.forEach(cat=>{
+      const sel=designData.bodyMaterial&&cat.items.includes(designData.bodyMaterial)?'selected':'';
+      h+='<div class="lining-card '+sel+'" onclick="selectBodyMat(\''+cat.items[0]+'\')">';
+      h+='<div class="lc-name">'+cat.name+'</div><div class="lc-desc">'+cat.desc+'</div></div>';
+    });
+    h+='<div class="section-title" style="padding:8px 0 4px">布艺</div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    MATERIALS_BEGINNER.fabric.forEach(f=>{
+      const sel=designData.bodyMaterial===f?'selected':'';
+      h+='<div class="tag '+sel+'" onclick="selectBodyMat(\''+f+'\')">'+f+'</div>';
+    });
+    h+='</div>';
+  } else {
+    h+='<div class="section-title" style="padding:0 0 4px">皮质</div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    MATERIALS_MAKER.leather.forEach(m=>{
+      const sel=designData.bodyMaterial===m?'selected':'';
+      h+='<div class="tag '+sel+'" onclick="selectBodyMat(\''+m+'\')">'+m+'</div>';
+    });
+    h+='</div>';
+    h+='<div class="section-title" style="padding:8px 0 4px">布艺</div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    MATERIALS_MAKER.fabric.forEach(m=>{
+      const sel=designData.bodyMaterial===m?'selected':'';
+      h+='<div class="tag '+sel+'" onclick="selectBodyMat(\''+m+'\')">'+m+'</div>';
+    });
+    h+='</div>';
+  }
+  h+='<div class="section-title" style="padding:8px 0 4px">颜色</div>';
+  h+='<div class="color-grid">';
+  COLORS_24.forEach(c=>{
+    const sel=designData.bodyColor===c?'selected':'';
+    const border=c==='#FFFFFF'?'border:1px solid var(--border-color);':'';
+    h+='<div class="color-swatch '+sel+'" style="background:'+c+';'+border+'" onclick="selectBodyColor(\''+c+'\')"></div>';
+  });
+  h+='</div>';
+  h+='<div style="margin-top:4px"><div class="custom-input" style="max-width:140px"><input type="text" placeholder="自定义色 #RRGGBB" onchange="selectBodyColor(this.value)"><span class="unit">🎨</span></div></div>';
+  h+='</div>';return h;
+}
+
+function selectBodyMat(m){designData.bodyMaterial=m;renderStep4();}
+function selectBodyColor(c){designData.bodyColor=c;renderStep4();}
+
+function renderSub2(){
+  let h='<div style="padding:12px 16px">';
+  h+='<div class="section-title" style="padding:0 0 8px">封口方式</div>';
+  if(appMode==='beginner')h+='<div class="note-card">选择包包的开关方式</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:8px">';
+  const icons={'拉链':'🗜','翻盖':'📎','抽绳':'🪢','磁扣':'🧲'};
+  CLOSURES.forEach(c=>{
+    const sel=designData.closure===c?'selected':'';
+    h+='<div class="hw-option '+sel+'" onclick="selectClosure(\''+c+'\')"><span style="font-size:16px">'+(icons[c]||'')+'</span> '+c+'</div>';
+  });
+  h+='</div></div>';return h;
+}
+function selectClosure(c){designData.closure=c;renderStep4();}
+
+function renderSub3(){
+  let h='<div style="padding:12px 16px">';
+  h+='<div class="section-title" style="padding:0 0 8px">肩带/提手款式</div>';
+  if(appMode==='beginner')h+='<div class="note-card">选择包包的携带方式</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:8px">';
+  const icons={'单肩带':'〰','双提手':'🤲','链条':'⛓','编织带':'🧶','宽肩带':'▬'};
+  STRAP_STYLES.forEach(s=>{
+    const sel=designData.strapStyle===s?'selected':'';
+    h+='<div class="hw-option '+sel+'" onclick="selectStrap(\''+s+'\')"><span style="font-size:14px">'+(icons[s]||'')+'</span> '+s+'</div>';
+  });
+  h+='</div>';
+  h+='<div class="section-title" style="padding:8px 0 4px">肩带材质</div>';
+  if(appMode==='maker'){
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    [...MATERIALS_MAKER.leather.slice(0,5),...MATERIALS_MAKER.fabric.slice(0,3)].forEach(m=>{
+      const sel=designData.strapMaterial===m?'selected':'';
+      h+='<div class="tag '+sel+'" onclick="selectStrapMat(\''+m+'\')">'+m+'</div>';
+    });
+    h+='</div>';
+  } else {
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    ['同包体材质','链条','编织绳'].forEach(m=>{
+      const sel=designData.strapMaterial===m?'selected':'';
+      h+='<div class="tag '+sel+'" onclick="selectStrapMat(\''+m+'\')">'+m+'</div>';
+    });
+    h+='</div>';
+  }
+  h+='</div>';return h;
+}
+function selectStrap(s){designData.strapStyle=s;renderStep4();}
+function selectStrapMat(m){designData.strapMaterial=m;renderStep4();}
+
+function renderSub4(){
+  let h='<div style="padding:12px 16px">';
+  h+='<div class="section-title" style="padding:0 0 4px">五金配件</div>';
+  if(appMode==='beginner')h+='<div class="note-card">选择金属配件，让包包更有质感</div>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
+  ['gold','silver'].forEach(c=>{
+    const sel=designData.hardwareColor===c?'selected':'';
+    const label=c==='gold'?'金色':'银色';
+    const dot=c==='gold'?'#D4A84B':'#C0C0C0';
+    h+='<div class="hw-option '+sel+'" onclick="selectHWColor(\''+c+'\')"><span class="hw-color-dot" style="background:'+dot+'"></span> '+label+'</div>';
+  });
+  h+='</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+  HARDWARES.forEach(hw=>{
+    const sel=designData.hardwares.includes(hw.name)?'selected':'';
+    h+='<div class="hw-option '+sel+'" onclick="toggleHW(\''+hw.name+'\')"><span>'+hw.icon+'</span> '+hw.name+'</div>';
+  });
+  h+='</div></div>';return h;
+}
+function selectHWColor(c){designData.hardwareColor=c;renderStep4();}
+function toggleHW(name){
+  const idx=designData.hardwares.indexOf(name);
+  if(idx>=0)designData.hardwares.splice(idx,1);else designData.hardwares.push(name);
+  renderStep4();
+}
+
+function renderSub5(){
+  let h='<div style="padding:12px 16px">';
+  h+='<div class="section-title" style="padding:0 0 4px">装饰（可多选）</div>';
+  if(appMode==='beginner')h+='<div class="note-card">给包包加点装饰，让它更独特</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:8px">';
+  DECORS.forEach(d=>{
+    const sel=designData.decors.includes(d)?'selected':'';
+    h+='<div class="decor-option '+sel+'" onclick="toggleDecor(\''+d+'\')">'+d+'</div>';
+  });
+  h+='</div>';
+  if(designData.decors.length>0){
+    h+='<div style="margin-top:12px;padding:10px;background:var(--bg-secondary);border-radius:var(--radius-sm)">';
+    h+='<div style="font-size:12px;color:var(--text-secondary)">已选装饰：</div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">';
+    designData.decors.forEach(d=>h+='<span style="background:var(--accent-gold-light);color:var(--accent-brown);padding:2px 8px;border-radius:8px;font-size:11px">'+d+'</span>');
+    h+='</div></div>';
+  }
+  h+='</div>';return h;
+}
+function toggleDecor(name){
+  const idx=designData.decors.indexOf(name);
+  if(idx>=0)designData.decors.splice(idx,1);else designData.decors.push(name);
+  renderStep4();
+}
+
+function renderSub6(){
+  let h='<div style="padding:12px 16px">';
+  h+='<div class="section-title" style="padding:0 0 4px">内衬材料</div>';
+  if(appMode==='beginner')h+='<div class="note-card">内衬让包包更有型、更耐用</div>';
+  h+='<div style="font-size:13px;font-weight:600;color:var(--text-primary);margin:8px 0 6px">硬衬（定型用）</div>';
+  LININGS_HARD.forEach(l=>{
+    const sel=designData.liningHard===l?'selected':'';
+    h+='<div class="lining-card '+sel+'" onclick="selectLiningH(\''+l+'\')"><div class="lc-name">'+l+'</div></div>';
+  });
+  h+='<div style="font-size:13px;font-weight:600;color:var(--text-primary);margin:12px 0 6px">软衬（缓冲用）</div>';
+  LININGS_SOFT.forEach(l=>{
+    const sel=designData.liningSoft===l?'selected':'';
+    h+='<div class="lining-card '+sel+'" onclick="selectLiningS(\''+l+'\')"><div class="lc-name">'+l+'</div></div>';
+  });
+  h+='</div>';return h;
+}
+function selectLiningH(l){designData.liningHard=l;renderStep4();}
+function selectLiningS(l){designData.liningSoft=l;renderStep4();}
+
+// ========== RENDER STEP 5: OUTPUT ==========
+function renderStep5(){
+  const color=designData.bodyColor||'#8B4513',shape=designData.shape||'rect';
+  let h='<div style="padding:12px 0">';
+  h+='<div class="output-tabs">';
+  const tabs=[{id:'effect',name:'效果图'},{id:'cutting',name:'裁剪图'},{id:'materials',name:'材料清单'},{id:'makers',name:'找制作者'},{id:'tutorial',name:'教程'},{id:'warnings',name:'注意'}];
+  tabs.forEach(t=>{
+    const sel=outputTab===t.id?'active':'';
+    h+='<div class="output-tab '+sel+'" onclick="setOutputTab(\''+t.id+'\')">'+t.name+'</div>';
+  });
+  h+='</div>';
+
+  switch(outputTab){
+    case'effect':h+=renderEffectTab(shape,color);break;
+    case'cutting':h+=renderCuttingTab(shape,color);break;
+    case'materials':h+=renderMaterialsTab();break;
+    case'makers':h+=renderMakersTab();break;
+    case'tutorial':h+=renderTutorialTab();break;
+    case'warnings':h+=renderWarningsTab();break;
+  }
+
+  h+='<div style="padding:12px 16px;display:flex;gap:8px">';
+  h+='<button class="btn btn-primary" style="flex:1" onclick="showToast(\'即将跳转电商平台\')">🛒 购买材料</button>';
+  h+='<button class="btn btn-outline" style="flex:1" onclick="showToast(\'设计已保存\')">💾 保存设计</button>';
+  h+='</div></div>';
+  document.getElementById('stepContainer').innerHTML=h;
+}
+
+function setOutputTab(t){outputTab=t;effectView='front';renderStep5();}
+function setEffectView(v){effectView=v;renderStep5();}
+
+function renderEffectTab(shape,color){
+  let h='<div style="padding:0 16px">';
+  h+='<div style="display:flex;gap:6px;margin:8px 0">';
+  ['front','side','bottom'].forEach(v=>{
+    const sel=effectView===v?'btn-primary':'btn-outline';
+    const label=v==='front'?'正面':v==='side'?'侧面':'底部';
+    h+='<button class="btn btn-sm '+sel+'" onclick="setEffectView(\''+v+'\')">'+label+'</button>';
+  });
+  h+='</div>';
+  h+='<div style="background:#fff;border-radius:var(--radius-md);padding:16px;text-align:center;min-height:200px;display:flex;align-items:center;justify-content:center">';
+  switch(effectView){
+    case'front':h+=bagPreviewSVG(shape,color,180,180);break;
+    case'side':h+=sideViewSVG(shape,color);break;
+    case'bottom':h+=bottomViewSVG(shape,color);break;
+  }
+  h+='</div>';
+
+  const shapeName=SHAPES.find(s=>s.id===shape);
+  const dims=getDims();
+  h+='<div style="margin-top:12px;padding:12px;background:var(--bg-card);border-radius:var(--radius-md)">';
+  h+='<div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:8px">设计摘要</div>';
+  h+='<div style="font-size:12px;color:var(--text-secondary);line-height:1.8">';
+  h+='形状：'+(shapeName?shapeName.name:'-')+'<br>';
+  h+='尺寸：'+dims[0]+'×'+dims[1]+'×'+dims[2]+' cm<br>';
+  h+='材质：'+(designData.bodyMaterial||'-')+'<br>';
+  h+='封口：'+(designData.closure||'-')+'<br>';
+  h+='肩带：'+(designData.strapStyle||'-')+'<br>';
+  h+='五金：'+(designData.hardwares.length>0?designData.hardwares.join('、'):'-')+'<br>';
+  h+='装饰：'+(designData.decors.length>0?designData.decors.join('、'):'-')+'<br>';
+  h+='</div></div></div>';
+  return h;
+}
+
+function renderCuttingTab(shape,color){
+  const dims=getDims();const l=dims[0],w=dims[1];
+  let h='<div style="padding:0 16px">';
+  h+='<div style="display:flex;gap:6px;margin:8px 0">';
+  ['面板','侧边','底部','内衬'].forEach((v,i)=>{
+    h+='<button class="btn btn-sm '+(i===0?'btn-primary':'btn-outline')+'">'+v+'</button>';
+  });
+  h+='</div>';
+  h+='<div style="background:#fff;border-radius:var(--radius-md);padding:16px;text-align:center">';
+  const pw=Math.min(l*3,240),ph=Math.min(w*3,150);
+  h+='<svg viewBox="0 0 280 200" width="260" style="max-width:100%">';
+  h+='<rect x="20" y="15" width="'+pw+'" height="'+ph+'" fill="'+color+'" opacity="0.2" stroke="'+color+'" stroke-width="1.5" stroke-dasharray="6,3"/>';
+  h+='<rect x="17" y="12" width="'+(pw+6)+'" height="'+(ph+6)+'" fill="none" stroke="var(--accent-brown)" stroke-width="1" stroke-dasharray="3,3"/>';
+  h+='<text x="'+(20+pw/2)+'" y="'+(15+ph/2)+'" text-anchor="middle" font-size="12" fill="var(--text-secondary)">面板 '+l+'×'+w+'cm</text>';
+  h+='<text x="'+(20+pw/2)+'" y="'+(18+ph+12)+'" text-anchor="middle" font-size="9" fill="var(--text-light)">虚线外框为缝位1cm</text>';
+  h+='</svg></div></div>';
+  return h;
+}
+
+function renderMaterialsTab(){
+  const dims=getDims();const area=materialEstimate();
+  const prices={'牛皮':280,'羊皮':220,'猪皮':150,'马皮':350,'蛇皮':480,'植鞣革':300,'油鞣革/疯马皮':260,'头层皮':240,'二层皮':120,'PU革':60,'PVC革':45,'铬鞣革(Togo)':320,'铬鞣革(Saffiano)':300,'铬鞣革(Caviar)':340,'尼龙':35,'牛津布':40,'帆布(粗)':50,'帆布(细)':55,'牛仔布':45,'棉布':30,'涤纶布':28,'涤棉布':35,'全涤布':25,'羽绒布':55};
+  let totalCost=0;
+  const matName=designData.bodyMaterial||'未选择';
+  const matPrice=prices[matName]||100;
+  const matArea=(area/100).toFixed(2);
+  const matCost=Math.round(matPrice*parseFloat(matArea));
+  totalCost+=matCost;
+
+  let h='<div style="padding:0 0 8px">';
+  h+='<div class="material-row" style="background:var(--bg-secondary);font-weight:600;font-size:11px">';
+  h+='<div class="mat-name">材料</div><div class="mat-qty">用量</div><div class="mat-price">单价</div><div class="mat-sub">小计</div></div>';
+
+  h+='<div class="material-row"><div class="mat-name">'+matName+'</div><div class="mat-qty">'+matArea+'dm²</div><div class="mat-price">¥'+matPrice+'/dm²</div><div class="mat-sub">¥'+matCost+'</div></div>';
+
+  if(designData.liningHard){const lp=15;const lc=Math.round(parseFloat(matArea)*lp);totalCost+=lc;
+    h+='<div class="material-row"><div class="mat-name">'+designData.liningHard+'</div><div class="mat-qty">'+matArea+'dm²</div><div class="mat-price">¥'+lp+'/dm²</div><div class="mat-sub">¥'+lc+'</div></div>';}
+  if(designData.liningSoft){const lp=20;const lc=Math.round(parseFloat(matArea)*lp);totalCost+=lc;
+    h+='<div class="material-row"><div class="mat-name">'+designData.liningSoft+'</div><div class="mat-qty">'+matArea+'dm²</div><div class="mat-price">¥'+lp+'/dm²</div><div class="mat-sub">¥'+lc+'</div></div>';}
+  if(designData.closure){const cp=designData.closure==='拉链'?25:designData.closure==='链条'?45:15;totalCost+=cp;
+    h+='<div class="material-row"><div class="mat-name">'+designData.closure+'</div><div class="mat-qty">1个</div><div class="mat-price">-</div><div class="mat-sub">¥'+cp+'</div></div>';}
+  designData.hardwares.forEach(hw=>{totalCost+=12;
+    h+='<div class="material-row"><div class="mat-name">'+hw+'</div><div class="mat-qty">1个</div><div class="mat-price">-</div><div class="mat-sub">¥12</div></div>';});
+  totalCost+=8;
+  h+='<div class="material-row"><div class="mat-name">缝线</div><div class="mat-qty">1卷</div><div class="mat-price">-</div><div class="mat-sub">¥8</div></div>';
+
+  h+='<div class="material-total"><span>预估总费用</span><span style="color:var(--danger);font-size:18px">¥'+totalCost+'</span></div></div>';
+  return h;
+}
+
+function renderMakersTab(){
+  let h='<div style="padding:8px 16px">';
+  h+='<div style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">为你推荐合适的制作者</div>';
+  MAKERS.forEach(m=>{
+    h+='<div class="maker-profile">';
+    h+='<div class="mp-avatar"><svg viewBox="0 0 48 48" width="48" height="48"><circle cx="24" cy="24" r="24" fill="'+m.avatar+'"/><circle cx="24" cy="18" r="8" fill="rgba(255,255,255,0.6)"/><ellipse cx="24" cy="38" rx="14" ry="10" fill="rgba(255,255,255,0.4)"/></svg></div>';
+    h+='<div class="mp-info"><div class="mp-name">'+m.name+'</div><div class="mp-style">'+m.style+'</div><div class="mp-rating">★ '+m.rating+'</div></div>';
+    h+='<button class="btn btn-sm btn-primary" onclick="showToast(\'已发送联系请求\')">联系</button></div>';
+  });
+  h+='</div>';return h;
+}
+
+function renderTutorialTab(){
+  const tutorialSVGs=[
+    '<svg viewBox="0 0 80 80" width="60" height="60"><path d="M20,60 L60,20" stroke="var(--accent-brown)" stroke-width="2"/><circle cx="20" cy="60" r="6" fill="none" stroke="var(--accent-brown)" stroke-width="2"/><circle cx="60" cy="20" r="6" fill="none" stroke="var(--accent-brown)" stroke-width="2"/><rect x="25" y="30" width="30" height="20" rx="2" fill="var(--accent-gold-light)" stroke="var(--accent-brown)" stroke-width="1" stroke-dasharray="3"/></svg>',
+    '<svg viewBox="0 0 80 80" width="60" height="60"><rect x="15" y="20" width="50" height="25" rx="2" fill="var(--accent-gold-light)" stroke="var(--accent-brown)" stroke-width="1"/><rect x="15" y="35" width="50" height="25" rx="2" fill="var(--accent-brown-light)" opacity="0.5" stroke="var(--accent-brown)" stroke-width="1"/></svg>',
+    '<svg viewBox="0 0 80 80" width="60" height="60"><rect x="15" y="15" width="50" height="50" rx="2" fill="var(--accent-gold-light)" stroke="var(--accent-brown)" stroke-width="1"/><path d="M15,40 L65,40" stroke="var(--accent-brown)" stroke-width="1.5" stroke-dasharray="3,3"/><circle cx="25" cy="40" r="2" fill="var(--accent-brown)"/><circle cx="35" cy="40" r="2" fill="var(--accent-brown)"/><circle cx="45" cy="40" r="2" fill="var(--accent-brown)"/><circle cx="55" cy="40" r="2" fill="var(--accent-brown)"/></svg>',
+    '<svg viewBox="0 0 80 80" width="60" height="60"><rect x="15" y="15" width="50" height="50" rx="2" fill="var(--accent-gold-light)" stroke="var(--accent-brown)" stroke-width="1"/><circle cx="30" cy="30" r="4" fill="var(--accent-gold)" stroke="var(--accent-brown)" stroke-width="1"/><circle cx="50" cy="30" r="4" fill="var(--accent-gold)" stroke="var(--accent-brown)" stroke-width="1"/><rect x="25" y="45" width="10" height="10" rx="1" fill="var(--accent-gold)" stroke="var(--accent-brown)" stroke-width="1"/></svg>',
+    '<svg viewBox="0 0 80 80" width="60" height="60"><rect x="20" y="30" width="40" height="30" rx="2" fill="var(--accent-gold-light)" stroke="var(--accent-brown)" stroke-width="1"/><path d="M30,30 Q30,10 40,10 Q50,10 50,30" fill="none" stroke="var(--accent-brown)" stroke-width="2.5"/></svg>',
+    '<svg viewBox="0 0 80 80" width="60" height="60"><rect x="15" y="15" width="50" height="50" rx="2" fill="var(--accent-gold-light)" stroke="var(--accent-brown)" stroke-width="1"/><rect x="25" y="35" width="30" height="20" rx="2" fill="var(--bg-secondary)" stroke="var(--accent-brown)" stroke-width="1" stroke-dasharray="3"/></svg>',
+    '<svg viewBox="0 0 80 80" width="60" height="60"><rect x="10" y="25" width="25" height="35" rx="2" fill="var(--accent-gold-light)" opacity="0.6" stroke="var(--accent-brown)" stroke-width="1"/><rect x="45" y="25" width="25" height="35" rx="2" fill="var(--accent-brown-light)" opacity="0.4" stroke="var(--accent-brown)" stroke-width="1"/><path d="M35,42 L45,42" stroke="var(--danger)" stroke-width="2"/></svg>',
+    '<svg viewBox="0 0 80 80" width="60" height="60"><rect x="15" y="15" width="50" height="50" rx="4" fill="var(--accent-gold-light)" stroke="var(--accent-brown)" stroke-width="1.5"/><path d="M28,40 L36,48 L52,32" fill="none" stroke="var(--success)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  ];
+
+  let h='<div style="padding:8px 0">';
+  TUTORIAL_STEPS.forEach((step,i)=>{
+    h+='<div class="tutorial-step" style="animation:fadeIn 0.3s ease '+(i*0.05)+'s both">';
+    h+='<div class="step-img">'+tutorialSVGs[i]+'</div>';
+    h+='<div class="step-text"><div class="step-num">步骤 '+(i+1)+'</div>';
+    h+='<div class="step-title">'+step.title+'</div>';
+    h+='<div class="step-desc">'+step.desc+'</div></div></div>';
+  });
+  h+='</div>';return h;
+}
+
+function renderWarningsTab(){
+  let h='<div style="padding:8px 0">';
+  h+='<div style="padding:8px 16px;font-size:14px;font-weight:600;color:var(--text-primary)">⚠️ 制作注意事项</div>';
+  WARNINGS.forEach((w,i)=>{
+    h+='<div class="warning-item"><div class="wi-num">'+(i+1)+'</div>';
+    h+='<div class="wi-text"><span class="wi-title">'+w.title+'</span><br>'+w.text+'</div></div>';
+  });
+  h+='</div>';return h;
+}
+
+// ========== FREE DRAW ==========
+let drawCtx,isDrawing=false,drawTool='pen',symmetryMode=false;
+let drawHistory=[],drawHistoryIdx=-1;
+let showGrid=true,showGuides=true;
+
+function openFreeDraw(){
+  designData.isFreeShape=true;
+  document.getElementById('drawOverlay').classList.add('show');
+  initDrawCanvas();
+  if(designData.freeDrawPath){
+    const img=new Image();
+    img.onload=function(){
+      drawCtx.drawImage(img,0,0);
+      saveDrawHistory();
+    };
+    img.src=designData.freeDrawPath;
+  } else {
+    saveDrawHistory();
+  }
+}
+function closeFreeDraw(){document.getElementById('drawOverlay').classList.remove('show');}
+
+function initDrawCanvas(){
+  const canvas=document.getElementById('drawCanvas');
+  canvas.width=359;canvas.height=400;
+  drawCtx=canvas.getContext('2d');
+  redrawCanvas();
+
+  const tb=document.getElementById('drawToolbar');
+  const tools=[
+    {id:'pen',icon:'✏️',label:'画笔'},
+    {id:'line',icon:'📏',label:'直线'},
+    {id:'curve',icon:'〰',label:'曲线'},
+    {id:'eraser',icon:'🧹',label:'橡皮擦'},
+    {id:'symmetry',icon:'🔄',label:symmetryMode?'对称(开)':'对称(关)'},
+    {id:'undo',icon:'↩️',label:'撤销'},
+    {id:'redo',icon:'↪️',label:'重做'},
+    {id:'clear',icon:'🗑',label:'清空'}
+  ];
+  tb.innerHTML=tools.map(t=>{
+    let cls='draw-tool';
+    if(t.id===drawTool)cls+=' active';
+    if(t.id==='symmetry'&&symmetryMode)cls+=' symmetry-on';
+    return '<div class="'+cls+'" onclick="drawToolAction(\''+t.id+'\')">'
+      +'<span class="dt-icon">'+t.icon+'</span>'
+      +'<span class="dt-label">'+t.label+'</span></div>';
+  }).join('');
+
+  canvas.onmousedown=canvas.ontouchstart=function(e){
+    e.preventDefault();isDrawing=true;
+    const pos=getDrawPos(e);drawCtx.beginPath();drawCtx.moveTo(pos.x,pos.y);
+  };
+  canvas.onmousemove=canvas.ontouchmove=function(e){
+    if(!isDrawing)return;e.preventDefault();
+    const pos=getDrawPos(e);
+    drawCtx.lineWidth=drawTool==='eraser'?15:2;
+    drawCtx.lineCap='round';
+    drawCtx.strokeStyle=drawTool==='eraser'?'#fff':'#8B6914';
+    drawCtx.lineTo(pos.x,pos.y);drawCtx.stroke();
+    if(symmetryMode&&drawTool!=='eraser'){
+      const mx=canvas.width-pos.x;
+      drawCtx.beginPath();drawCtx.moveTo(mx,pos.y-1);drawCtx.lineTo(mx,pos.y);drawCtx.stroke();
+    }
+  };
+  canvas.onmouseup=canvas.ontouchend=function(){if(isDrawing){isDrawing=false;saveDrawHistory();}};
+}
+
+function getDrawPos(e){
+  const canvas=document.getElementById('drawCanvas');
+  const rect=canvas.getBoundingClientRect();
+  const touch=e.touches?e.touches[0]:e;
+  return{x:touch.clientX-rect.left,y:touch.clientY-rect.top};
+}
+
+function drawToolAction(id){
+  switch(id){
+    case'pen':drawTool='pen';break;case'line':drawTool='line';break;
+    case'curve':drawTool='curve';break;case'eraser':drawTool='eraser';break;
+    case'symmetry':symmetryMode=!symmetryMode;showToast(symmetryMode?'对称模式已开启':'对称模式已关闭');break;
+    case'undo':undoDraw();return;case'redo':redoDraw();return;
+    case'clear':clearDraw();return;
+  }
+  initDrawCanvas();
+}
+
+function redrawCanvas(){
+  const canvas=document.getElementById('drawCanvas');
+  drawCtx.fillStyle='#fff';drawCtx.fillRect(0,0,canvas.width,canvas.height);
+  if(showGrid){
+    drawCtx.strokeStyle='#f0e8d8';drawCtx.lineWidth=0.5;
+    for(let x=0;x<canvas.width;x+=20){drawCtx.beginPath();drawCtx.moveTo(x,0);drawCtx.lineTo(x,canvas.height);drawCtx.stroke();}
+    for(let y=0;y<canvas.height;y+=20){drawCtx.beginPath();drawCtx.moveTo(0,y);drawCtx.lineTo(canvas.width,y);drawCtx.stroke();}
+  }
+  if(showGuides){
+    drawCtx.strokeStyle='#d4c4a8';drawCtx.lineWidth=1;drawCtx.setLineDash([5,5]);
+    drawCtx.beginPath();drawCtx.moveTo(canvas.width/2,0);drawCtx.lineTo(canvas.width/2,canvas.height);drawCtx.stroke();
+    drawCtx.beginPath();drawCtx.moveTo(0,canvas.height/2);drawCtx.lineTo(canvas.width,canvas.height/2);drawCtx.stroke();
+    drawCtx.setLineDash([]);
+  }
+}
+
+function saveDrawHistory(){
+  const canvas=document.getElementById('drawCanvas');
+  drawHistory=drawHistory.slice(0,drawHistoryIdx+1);
+  drawHistory.push(canvas.toDataURL());drawHistoryIdx=drawHistory.length-1;
+}
+function undoDraw(){if(drawHistoryIdx>0){drawHistoryIdx--;restoreDraw();}}
+function redoDraw(){if(drawHistoryIdx<drawHistory.length-1){drawHistoryIdx++;restoreDraw();}}
+function restoreDraw(){
+  const canvas=document.getElementById('drawCanvas');
+  const img=new Image();img.onload=function(){drawCtx.clearRect(0,0,canvas.width,canvas.height);drawCtx.drawImage(img,0,0);};
+  img.src=drawHistory[drawHistoryIdx];
+}
+function clearDraw(){redrawCanvas();drawHistory=[];drawHistoryIdx=-1;saveDrawHistory();}
+
+function confirmFreeDraw(){
+  try {
+    const canvas=document.getElementById('drawCanvas');
+    designData.isFreeShape=true;designData.shape='free';
+    if(canvas) designData.freeDrawPath=canvas.toDataURL('image/png');
+    document.getElementById('drawOverlay').classList.remove('show');
+    showToast('自由形状已保存');
+    renderStep();
+  } catch(e) {
+    console.error('confirmFreeDraw error:',e);
+    document.getElementById('drawOverlay').classList.remove('show');
+    showToast('保存失败，请重试');
+  }
+}
+
+// ========== MAIN RENDER ==========
+function renderStep(){
+  renderStepBar();renderSubStepBar();renderStepNav();
+  switch(currentStep){
+    case 1:renderStep1();break;case 2:renderStep2();break;case 3:renderStep3();break;
+    case 4:renderStep4();break;case 5:renderStep5();break;
+  }
+}
+
+// ========== HOME INIT ==========
+function initHome(){
+  document.getElementById('templateScroll').innerHTML=TEMPLATES.map((t,i)=>
+    '<div class="template-card" onclick="applyTemplate('+i+')">'+
+    '<div class="tpl-img">'+bagPreviewSVG(t.shape,t.color,80,80)+'</div>'+
+    '<div class="tpl-info"><div class="tpl-name">'+t.name+'</div><div class="tpl-desc">'+t.desc+'</div></div></div>'
+  ).join('');
+
+  document.getElementById('homeMakers').innerHTML=MAKERS.map(m=>
+    '<div class="maker-card">'+
+    '<div class="maker-avatar"><svg viewBox="0 0 44 44" width="44" height="44"><circle cx="22" cy="22" r="22" fill="'+m.avatar+'"/><circle cx="22" cy="16" r="7" fill="rgba(255,255,255,0.6)"/><ellipse cx="22" cy="36" rx="12" ry="9" fill="rgba(255,255,255,0.4)"/></svg></div>'+
+    '<div class="maker-info"><div class="maker-name">'+m.name+'</div><div class="maker-style">'+m.style+'</div><div class="maker-rating">★ '+m.rating+'</div></div>'+
+    '<button class="btn btn-sm btn-outline" onclick="showToast(\'查看主页\')">关注</button></div>'
+  ).join('');
+}
+
+// ========== COMMUNITY INIT ==========
+function initCommunity(){
+  document.getElementById('communityMakers').innerHTML=MAKERS.map(m=>
+    '<div class="maker-card">'+
+    '<div class="maker-avatar"><svg viewBox="0 0 44 44" width="44" height="44"><circle cx="22" cy="22" r="22" fill="'+m.avatar+'"/><circle cx="22" cy="16" r="7" fill="rgba(255,255,255,0.6)"/><ellipse cx="22" cy="36" rx="12" ry="9" fill="rgba(255,255,255,0.4)"/></svg></div>'+
+    '<div class="maker-info"><div class="maker-name">'+m.name+'</div><div class="maker-style">'+m.style+'</div><div class="maker-rating">★ '+m.rating+'</div></div>'+
+    '<button class="btn btn-sm btn-outline">关注</button></div>'
+  ).join('');
+
+  const workColors=['#D2B48C','#FFB6C1','#4A4A4A','#8FBC8F','#DEB887','#9370DB'];
+  const workShapes=['rect','semicircle','tshape','trapezoid','cylinder','hexagon'];
+  document.getElementById('workGrid').innerHTML=WORKS.map((w,i)=>
+    '<div class="work-item">'+
+    '<div class="work-img">'+bagPreviewSVG(workShapes[i],workColors[i],80,80)+'</div>'+
+    '<div class="work-title">'+w.title+'<br><span style="font-size:10px;color:var(--text-light)">'+w.desc+'</span></div></div>'
+  ).join('');
+}
+
+// ========== MY PAGE INIT ==========
+function initMy(){
+  const designs=[
+    {name:'我的托特包',shape:'rect',color:'#D2B48C',date:'2024-01-15'},
+    {name:'粉色口金包',shape:'square',color:'#FFB6C1',date:'2024-01-10'},
+    {name:'复古马鞍包',shape:'oval',color:'#8B4513',date:'2024-01-05'}
+  ];
+  document.getElementById('myDesigns').innerHTML=designs.map(d=>
+    '<div class="my-design-item">'+
+    '<div class="my-design-thumb">'+bagPreviewSVG(d.shape,d.color,44,44)+'</div>'+
+    '<div class="my-design-info"><div class="my-design-name">'+d.name+'</div><div class="my-design-meta">'+d.date+'</div></div>'+
+    '<span style="color:var(--text-light);font-size:12px">›</span></div>'
+  ).join('');
+}
+
+// ========== TEMPLATE APPLY ==========
+function applyTemplate(idx){
+  const t=TEMPLATES[idx];
+  if(!t){showToast('模板不存在');return;}
+  designData.shape=t.shape;designData.size=t.size;
+  designData.styles=[...t.styles];designData.bodyMaterial=t.bodyMat;
+  designData.bodyColor=t.bodyColor;designData.closure=t.closure;
+  designData.strapStyle=t.strap;designData.isFreeShape=false;designData.isCustomSize=false;
+  designData.freeDrawPath=null;
+  currentStep=1;currentSubStep=1;
+  switchPage('Design');
+  showToast('已应用模板：'+t.name);
+}
+
+// ========== INIT ==========
+window.onload=function(){initHome();initCommunity();initMy();renderStep();};
+</script>
+</body>
+</html>
